@@ -3,8 +3,6 @@
 -- Importer ce fichier dans phpMyAdmin
 -- ================================================
 
-CREATE DATABASE IF NOT EXISTS milano_studio CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE milano_studio;
 
 -- Table des utilisateurs (admin)
 CREATE TABLE IF NOT EXISTS users (

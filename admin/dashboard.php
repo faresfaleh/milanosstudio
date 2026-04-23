@@ -21,6 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $pdo->prepare("UPDATE reservations SET statut='annulée' WHERE id=?")->execute([$id]);
     } elseif ($action === 'supprimer') {
         $pdo->prepare("DELETE FROM reservations WHERE id=?")->execute([$id]);
+    } elseif ($action === 'modifier') {
+        $nom_homme   = trim($_POST['nom_homme'] ?? '');
+        $nom_femme   = trim($_POST['nom_femme'] ?? '');
+        $telephone   = trim($_POST['telephone'] ?? '');
+        $cin         = trim($_POST['cin'] ?? '');
+        $date_soiree = trim($_POST['date_soiree'] ?? '');
+        $choix_prix  = trim($_POST['choix_prix'] ?? '');
+        $pdo->prepare("UPDATE reservations SET nom_homme=?, nom_femme=?, telephone=?, cin=?, date_soiree=?, choix_prix=? WHERE id=?")
+            ->execute([$nom_homme, $nom_femme, $telephone, $cin, $date_soiree, $choix_prix, $id]);
     }
     header('Location: dashboard.php');
     exit;
@@ -304,7 +313,7 @@ $reservations = $pdo->query("SELECT * FROM reservations ORDER BY created_at DESC
                         <td><a href="tel:<?= htmlspecialchars($r['telephone']) ?>" style="color:var(--red); text-decoration:none; font-weight:500;"><?= htmlspecialchars($r['telephone']) ?></a></td>
                         <td style="font-family:monospace; letter-spacing:0.05em; color:var(--text-light);"><?= htmlspecialchars($r['cin']) ?></td>
                         <td><?= $r['date_soiree'] ?></td>
-                        <td><?= htmlspecialchars($r['choix_package'] ?? '—') ?></td>
+                        <td><?= htmlspecialchars($r['choix_prix'] ?? $r['choix_package'] ?? '—') ?></td>
                         <td><?= htmlspecialchars($r['wedding_type'] ?? '—') ?></td>
                         <td>
                             <?php
@@ -333,6 +342,7 @@ $reservations = $pdo->query("SELECT * FROM reservations ORDER BY created_at DESC
                                     <button class="btn-action btn-cancel">✕</button>
                                 </form>
                                 <?php endif; ?>
+
                                 <form method="POST" onsubmit="return confirm('Supprimer cette réservation ?')">
                                     <input type="hidden" name="res_id" value="<?= $r['id'] ?>">
                                     <input type="hidden" name="action" value="supprimer">
@@ -347,6 +357,76 @@ $reservations = $pdo->query("SELECT * FROM reservations ORDER BY created_at DESC
         </table>
     </div>
 </div>
+
+<!-- EDIT MODAL -->
+<div id="edit-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9000; align-items:center; justify-content:center;" onclick="if(event.target===this)closeEdit()">
+    <div style="background:#fff; border-radius:12px; padding:36px; max-width:520px; width:90%; position:relative; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <button onclick="closeEdit()" style="position:absolute;top:14px;right:18px;background:none;border:none;color:#aaa;font-size:1.3rem;cursor:pointer;">✕</button>
+        <h3 style="font-family:'Playfair Display',serif; font-size:1.5rem; color:#1a1a1a; margin-bottom:4px;">Modifier la réservation</h3>
+        <p id="edit-subtitle" style="font-size:0.62rem; letter-spacing:0.15em; text-transform:uppercase; color:#E31E24; margin-bottom:24px;"></p>
+        <form method="POST" id="edit-form">
+            <input type="hidden" name="res_id" id="edit-res-id">
+            <input type="hidden" name="action" value="modifier">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                <div>
+                    <label style="font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:#888; display:block; margin-bottom:6px;">Nom Homme</label>
+                    <input type="text" name="nom_homme" id="edit-homme" style="width:100%; border:1px solid rgba(0,0,0,0.12); border-radius:6px; padding:10px 12px; font-size:0.9rem; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#E31E24'" onblur="this.style.borderColor='rgba(0,0,0,0.12)'">
+                </div>
+                <div>
+                    <label style="font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:#888; display:block; margin-bottom:6px;">Nom Femme</label>
+                    <input type="text" name="nom_femme" id="edit-femme" style="width:100%; border:1px solid rgba(0,0,0,0.12); border-radius:6px; padding:10px 12px; font-size:0.9rem; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#E31E24'" onblur="this.style.borderColor='rgba(0,0,0,0.12)'">
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                <div>
+                    <label style="font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:#888; display:block; margin-bottom:6px;">📞 Téléphone</label>
+                    <input type="tel" name="telephone" id="edit-tel" maxlength="8" style="width:100%; border:1px solid rgba(0,0,0,0.12); border-radius:6px; padding:10px 12px; font-size:0.9rem; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#E31E24'" onblur="this.style.borderColor='rgba(0,0,0,0.12)'">
+                </div>
+                <div>
+                    <label style="font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:#888; display:block; margin-bottom:6px;">🪪 CIN</label>
+                    <input type="text" name="cin" id="edit-cin" maxlength="8" style="width:100%; border:1px solid rgba(0,0,0,0.12); border-radius:6px; padding:10px 12px; font-size:0.9rem; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#E31E24'" onblur="this.style.borderColor='rgba(0,0,0,0.12)'">
+                </div>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:#888; display:block; margin-bottom:6px;">📅 Date de la soirée</label>
+                <input type="date" name="date_soiree" id="edit-date" style="width:100%; border:1px solid rgba(0,0,0,0.12); border-radius:6px; padding:10px 12px; font-size:0.9rem; outline:none; transition:border 0.2s; color-scheme:light;" onfocus="this.style.borderColor='#E31E24'" onblur="this.style.borderColor='rgba(0,0,0,0.12)'">
+            </div>
+            <div style="margin-bottom:24px;">
+                <label style="font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:#888; display:block; margin-bottom:6px;">💰 Options / Prix</label>
+                <input type="text" name="choix_prix" id="edit-prix" placeholder="ex: 2 caméras + drone — 1150 DT" style="width:100%; border:1px solid rgba(0,0,0,0.12); border-radius:6px; padding:10px 12px; font-size:0.9rem; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#E31E24'" onblur="this.style.borderColor='rgba(0,0,0,0.12)'">
+            </div>
+            <button type="submit" style="width:100%; background:#E31E24; color:#fff; border:none; padding:13px; border-radius:6px; font-family:'Montserrat',sans-serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#b81519'" onmouseout="this.style.background='#E31E24'">
+                Enregistrer les modifications
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+</style>
+
+<script>
+function openEdit(r) {
+    document.getElementById('edit-res-id').value  = r.id;
+    document.getElementById('edit-subtitle').textContent = (r.choix_prix || r.choix_package || '') + ' — ' + (r.wedding_type || '');
+    document.getElementById('edit-homme').value   = r.nom_homme || '';
+    document.getElementById('edit-femme').value   = r.nom_femme || '';
+    document.getElementById('edit-tel').value     = r.telephone || '';
+    document.getElementById('edit-cin').value     = r.cin || '';
+    document.getElementById('edit-date').value    = r.date_soiree || '';
+    document.getElementById('edit-prix').value    = r.choix_prix || '';
+    const overlay = document.getElementById('edit-overlay');
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeEdit() {
+    document.getElementById('edit-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeEdit();
+});
+</script>
 
 </body>
 </html>

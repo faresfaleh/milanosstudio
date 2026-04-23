@@ -1,11 +1,15 @@
 <?php
+?>
+<?php
 // ================================================
 // index.php - Page principale Milano Studio
 // ================================================
 require_once __DIR__ . '/php/config.php';
-$success = isset($_GET['success']);
-$paid    = isset($_GET['paid']);
-$error   = $_GET['error'] ?? '';
+$success  = isset($_GET['success']);
+$paid     = isset($_GET['paid']);
+$error    = $_GET['error'] ?? '';
+$ret_res_id = (int)($_GET['res_id'] ?? 0);
+$updated    = isset($_GET['updated']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,6 +19,8 @@ $error   = $_GET['error'] ?? '';
     <title>Milano Studio — Photography</title>
     <link rel="icon" type="image/jpeg" href="faa.png">
     <link rel="shortcut icon" type="image/jpeg" href="faa.png">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>emailjs.init('88HKnv1yOYXH7EY6e');</script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;400;500&family=Montserrat:wght@300;400;500;600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -72,8 +78,7 @@ $error   = $_GET['error'] ?? '';
         .lang { display: flex; gap: 4px; }
         .lang button { background: transparent; border: 1px solid rgba(0,0,0,0.15); color: var(--gray); font-family: 'Montserrat', sans-serif; font-size: 0.62rem; letter-spacing: 0.15em; padding: 5px 9px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; border-radius: 2px; }
         .lang button:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
-        .admin-link { font-family: 'Montserrat', sans-serif; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gray); text-decoration: none; border: 1px solid rgba(0,0,0,0.12); padding: 5px 12px; transition: all 0.3s; border-radius: 2px; }
-        .admin-link:hover { color: var(--red); border-color: var(--red); }
+       
 
         /* HERO */
         .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 40px 100px; position: relative; overflow: hidden; background: #fff; }
@@ -280,7 +285,15 @@ $error   = $_GET['error'] ?? '';
             <button onclick="setLang('fr')">FR</button>
             <button onclick="setLang('ar')">AR</button>
         </div>
-        <a href="php/login.php" class="admin-link">Admin</a>
+        
+        <!-- CART ICON -->
+        <button class="cart-btn" onclick="toggleCart()" id="cart-btn" title="Mes réservations">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <span class="cart-count" id="cart-count">0</span>
+        </button>
     </div>
 </header>
 
@@ -329,17 +342,23 @@ $error   = $_GET['error'] ?? '';
         <!-- Sélecteur options dans le modal -->
         <div id="modal-cam-group" style="margin-bottom:28px; padding:18px; background:#f8f8f8; border:1px solid rgba(227,30,36,0.15); border-radius:8px; display:flex; flex-direction:column; gap:14px;">
 
+            <!-- Photo illimité — obligatoire -->
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0;">
+                <span style="font-family:'Cormorant Garamond',serif; font-size:1rem; color:#1a1a1a;">📀 Photo illimité clé USB + montage vidéo</span>
+                <span style="font-family:'Montserrat',sans-serif; font-size:0.58rem; color:#4caf7d; border:1px solid rgba(76,175,80,0.3); padding:3px 8px; border-radius:20px;">Inclus ✓</span>
+            </div>
+
             <!-- Caméras -->
             <div>
                 <p id="modal-lbl-cameras" style="font-family:'Montserrat',sans-serif; font-size:0.58rem; letter-spacing:0.2em; text-transform:uppercase; color:#E31E24; margin-bottom:10px;">📹 Caméras vidéo</p>
                 <div style="display:flex; gap:16px; flex-wrap:wrap;">
                     <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-family:'Cormorant Garamond',serif; font-size:1rem; color:#1a1a1a;">
                         <input type="radio" name="nb_cameras" value="1" id="modal-cam-1" checked style="accent-color:#E31E24;" onchange="updateModalTotal()">
-                        <span id="modal-lbl-cam1">1 caméra</span> — <span style="color:#E31E24; font-weight:bold;">400 DT</span>
+                        <span id="modal-lbl-cam1">1 caméra</span> — <span style="color:#E31E24; font-weight:bold;">450 DT</span>
                     </label>
                     <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-family:'Cormorant Garamond',serif; font-size:1rem; color:#1a1a1a;">
                         <input type="radio" name="nb_cameras" value="2" id="modal-cam-2" style="accent-color:#E31E24;" onchange="updateModalTotal()">
-                        <span id="modal-lbl-cam2">2 caméras</span> — <span style="color:#E31E24; font-weight:bold;">550 DT</span> <span style="font-size:0.75rem; color:#aaa;">(+150 DT)</span>
+                        <span id="modal-lbl-cam2">2 caméras</span> — <span style="color:#E31E24; font-weight:bold;">700 DT</span> <span style="font-size:0.75rem; color:#aaa;">(+250 DT)</span>
                     </label>
                 </div>
             </div>
@@ -352,7 +371,7 @@ $error   = $_GET['error'] ?? '';
                         <input type="checkbox" id="modal-drone" style="accent-color:#E31E24; width:16px; height:16px;" onchange="updateModalTotal()">
                         🚁 <span id="modal-lbl-drone">Drone</span>
                     </span>
-                    <span style="font-family:'Montserrat',sans-serif; font-size:0.6rem; color:#E31E24; letter-spacing:0.1em;"><b>+350 DT</b></span>
+                    <span style="font-family:'Montserrat',sans-serif; font-size:0.6rem; color:#E31E24; letter-spacing:0.1em;"><b>+400 DT</b></span>
                 </label>
 
                 <!-- Girafe -->
@@ -361,18 +380,40 @@ $error   = $_GET['error'] ?? '';
                         <input type="checkbox" id="modal-girafe" style="accent-color:#E31E24; width:16px; height:16px;" onchange="updateModalTotal()">
                         🦒 <span id="modal-lbl-girafe">Girafe photography</span>
                     </span>
-                    <span style="font-family:'Montserrat',sans-serif; font-size:0.6rem; color:#E31E24; letter-spacing:0.1em;"><b>+500 DT</b></span>
+                    <span style="font-family:'Montserrat',sans-serif; font-size:0.6rem; color:#E31E24; letter-spacing:0.1em;"><b>+450 DT</b></span>
                 </label>
 
-                <!-- Transport -->
-                <div style="display:flex; align-items:center; justify-content:space-between; padding-top:8px; border-top:1px solid rgba(0,0,0,0.07);">
-                    <span style="font-family:'Cormorant Garamond',serif; font-size:1rem; color:#999;">🚗 <span id="modal-lbl-transport">Transport</span></span>
-                    <span style="font-family:'Montserrat',sans-serif; font-size:0.58rem; color:#aaa; letter-spacing:0.08em;"><b id="modal-lbl-sans-transport">Sans transport</b></span>
+                <!-- Photo book -->
+                <label id="modal-photobook-row" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+                    <span style="display:flex; align-items:center; gap:8px; font-family:'Cormorant Garamond',serif; font-size:1rem; color:#1a1a1a;">
+                        <input type="checkbox" id="modal-photobook" style="accent-color:#E31E24; width:16px; height:16px;" onchange="updateModalTotal()">
+                        📒 <span id="modal-lbl-photobook">Photo book 50 photos</span>
+                    </span>
+                    <span id="modal-photobook-price" style="font-family:'Montserrat',sans-serif; font-size:0.6rem; color:#E31E24; letter-spacing:0.1em;"><b>+150 DT</b></span>
+                </label>
+
+                <!-- Transport — Gouvernorat / Délégation -->
+                <div style="padding-top:10px; border-top:1px solid rgba(0,0,0,0.07);">
+                    <span style="font-family:'Cormorant Garamond',serif; font-size:1rem; color:#999; display:block; margin-bottom:10px;">🚗 <span id="modal-lbl-transport">Localisation</span></span>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div class="select-wrapper" style="margin-bottom:0;">
+                            <select id="modal-transport-gov" name="gouvernorat" onchange="updateDelegations()" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.95rem; padding:10px 36px 10px 12px; cursor:pointer; outline:none; transition:border-color 0.3s; border-radius:4px;">
+                                <option value="" id="opt-gov-placeholder">-- Gouvernorat --</option>
+                            </select>
+                        </div>
+                        <div class="select-wrapper" style="margin-bottom:0;">
+                            <select id="modal-transport-del" name="delegation" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.95rem; padding:10px 36px 10px 12px; cursor:pointer; outline:none; transition:border-color 0.3s; border-radius:4px;">
+                                <option value="" id="opt-del-placeholder">-- Délégation --</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <form action="traitement_devis.php" method="POST">
+        <form action="traitement_devis.php" method="POST" onsubmit="cartSaveFromModal(); envoyerEmailJS()">
             <input type="hidden" name="choix_package" id="modal-package-input">
+            <input type="hidden" id="modal-type-original">
+            <input type="hidden" name="res_id" id="modal-res-id" value="">
             <div class="form-group" id="modal-type-group" style="display:none;">
                 <label id="lbl-type">Type de cérémonie</label>
                 <div class="select-wrapper">
@@ -383,26 +424,7 @@ $error   = $_GET['error'] ?? '';
                     </select>
                 </div>
             </div>
-            <div class="form-group" id="modal-prix-group" style="display:none;">
-                <label id="lbl-package">Package</label>
-                <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
-                    <label class="pkg-radio-label" id="pkg1">
-                        <input type="radio" name="choix_prix" value="choix 1 — 400 DT" checked>
-                        <span id="pkg1-label">Choix 1 — 1 caméra + appareil photo</span>
-                        <span style="color:#E31E24; margin-left:auto; font-family:'Playfair Display',serif; font-size:1rem;">400 DT</span>
-                    </label>
-                    <label class="pkg-radio-label" id="pkg2">
-                        <input type="radio" name="choix_prix" value="choix 2 — 600 DT">
-                        <span id="pkg2-label">Choix 2 — 2 caméras + appareil photo</span>
-                        <span style="color:#E31E24; margin-left:auto; font-family:'Playfair Display',serif; font-size:1rem;">600 DT</span>
-                    </label>
-                    <label class="pkg-radio-label" id="pkg3">
-                        <input type="radio" name="choix_prix" value="choix 3 — 900 DT">
-                        <span id="pkg3-label">Choix 3 — 2 caméras + appareil + drone</span>
-                        <span style="color:#E31E24; margin-left:auto; font-family:'Playfair Display',serif; font-size:1rem;">900 DT</span>
-                    </label>
-                </div>
-            </div>
+            <!-- Package choices removed — managed via cart -->
             <fieldset>
                 <legend id="modal-coordonnees">Coordonnées du client</legend>
                 <div class="form-group" id="field-homme">
@@ -433,10 +455,10 @@ $error   = $_GET['error'] ?? '';
             </div>
             <!-- Total récapitulatif modal -->
             <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:rgba(227,30,36,0.05); border:1px solid rgba(227,30,36,0.2); border-radius:8px; margin-bottom:20px;">
-                <span style="font-family:'Montserrat',sans-serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:#888;">Total estimé <span style="color:#bbb; font-size:0.52rem;">(sans transport)</span></span>
-                <span id="modal-total-display" style="font-family:'Dancing Script',cursive; font-size:1.8rem; color:#E31E24; font-weight:700;">400 DT</span>
+                <span style="font-family:'Montserrat',sans-serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:#888;" id="lbl-total-estime-modal">Total estimé</span>
+                <span id="modal-total-display" style="font-family:'Dancing Script',cursive; font-size:1.8rem; color:#E31E24; font-weight:700;">450 DT</span>
             </div>
-            <input type="hidden" name="total_price" id="modal-total-price" value="400">
+            <input type="hidden" name="total_price" id="modal-total-price" value="450">
             <button type="submit" class="btn-submit" id="btn-envoyer">Envoyer ma réservation</button>
         </form>
     </div>
@@ -450,42 +472,55 @@ $error   = $_GET['error'] ?? '';
         <li class="reveal">
             <div class="svc-header">
                 <span class="svc-name" id="svc-shooting">Shooting</span>
-                <span class="svc-price">200 DT</span>
+                <span class="svc-price" id="svc-shooting-price">250 DT</span>
             </div>
             <div class="wedding-cards">
+
+                <!-- Shooting Individuel -->
                 <div class="wedding-card">
                     <div class="wedding-card-top"></div>
                     <div class="wedding-card-body">
                         <div class="wedding-card-icon">📸</div>
                         <div class="wedding-card-title" id="card-title-shoot-ind">Shooting Individuel</div>
                         <div class="wedding-card-desc" id="desc-shoot-ind">Séance photo personnelle</div>
+                        <div class="pkg-line" style="margin-bottom:8px;">
+                            <span class="pkg-line-desc">📸 <span id="lbl-photo-si">Appareil photo</span></span>
+                            <span class="cfg-badge">✓ Inclus</span>
+                        </div>
                         <div class="pkg-line" style="margin-bottom:16px;">
                             <span class="pkg-line-desc" id="lbl-prix-shoot-ind">Prix fixe</span>
-                            <span class="pkg-line-price">200 DT</span>
+                            <span class="pkg-line-price">250 DT</span>
                         </div>
                     </div>
-                    <button class="btn-reserver" style="width:100%;" onclick="openModal('Shooting', 'shoot-ind')" id="btn-reserver-shoot-ind"><span>Réserver</span></button>
+                    <button class="btn-reserver" style="width:100%;" onclick="openModal('Shooting Individuel','shoot-ind')" id="btn-reserver-shoot-ind"><span id="btn-text-shoot-ind">Réserver</span></button>
                 </div>
+
+                <!-- Shooting Mariage -->
                 <div class="wedding-card">
                     <div class="wedding-card-top"></div>
                     <div class="wedding-card-body">
                         <div class="wedding-card-icon">💑</div>
                         <div class="wedding-card-title" id="card-title-shoot-mar">Shooting Mariage</div>
                         <div class="wedding-card-desc" id="desc-shoot-mar">Séance photo de couple</div>
+                        <div class="pkg-line" style="margin-bottom:8px;">
+                            <span class="pkg-line-desc">📸 <span id="lbl-photo-sm">Appareil photo</span></span>
+                            <span class="cfg-badge">✓ Inclus</span>
+                        </div>
                         <div class="pkg-line" style="margin-bottom:16px;">
                             <span class="pkg-line-desc" id="lbl-prix-shoot-mar">Prix fixe</span>
-                            <span class="pkg-line-price">200 DT</span>
+                            <span class="pkg-line-price">250 DT</span>
                         </div>
                     </div>
-                    <button class="btn-reserver" style="width:100%;" onclick="openModal('Shooting Mariage', 'shoot-mar')" id="btn-reserver-shoot-mar"><span>Réserver</span></button>
+                    <button class="btn-reserver" style="width:100%;" onclick="openModal('Shooting Mariage','shoot-mar')" id="btn-reserver-shoot-mar"><span id="btn-text-shoot-mar">Réserver</span></button>
                 </div>
+
             </div>
         </li>
 
         <li class="reveal">
             <div class="svc-header">
                 <span class="svc-name" id="svc-wedding">Wedding Photography</span>
-                <span class="svc-price" id="svc-wedding-price">à partir de 400 DT</span>
+                <span class="svc-price" id="svc-wedding-price">à partir de 450 DT</span>
             </div>
             <div class="wedding-cards">
                 <?php foreach ([
@@ -508,12 +543,17 @@ $error   = $_GET['error'] ?? '';
                                 <span class="cfg-badge">Inclus ✓</span>
                             </div>
 
+                            <div class="cfg-row cfg-fixed">
+                                <label class="cfg-label" style="font-size:0.85rem;">📀 Photo illimité clé USB + montage vidéo</label>
+                                <span class="cfg-badge">Inclus ✓</span>
+                            </div>
+
                             <div class="cfg-row">
                                 <label class="cfg-label cfg-check-label">
                                     <input type="checkbox" class="cfg-checkbox" onchange="setCfg('<?= $type ?>','drone',this.checked?1:0)">
                                     🚁 <span class="lbl-drone">Drone</span>
                                 </label>
-                                <span class="cfg-sub">+350 DT</span>
+                                <span class="cfg-sub">+400 DT</span>
                             </div>
 
                             <div class="cfg-row">
@@ -521,17 +561,36 @@ $error   = $_GET['error'] ?? '';
                                     <input type="checkbox" class="cfg-checkbox" onchange="setCfg('<?= $type ?>','girafe',this.checked?1:0)">
                                     🦒 <span class="lbl-girafe">Girafe photography</span>
                                 </label>
-                                <span class="cfg-sub">+500 DT</span>
+                                <span class="cfg-sub">+450 DT</span>
                             </div>
 
-                            <div class="cfg-row cfg-fixed">
-                                <label class="cfg-label">🚗 <span class="lbl-transport">Transport</span></label>
-                                <span class="cfg-sub cfg-note lbl-sans-transport">Prix sans transport</span>
+                            <div class="cfg-row" id="cfg-photobook-row-<?= $type ?>" <?= $type === 'henna' ? 'style="display:none;"' : '' ?>>
+                                <label class="cfg-label cfg-check-label">
+                                    <input type="checkbox" class="cfg-checkbox" onchange="setCfg('<?= $type ?>','photobook',this.checked?1:0)">
+                                    📒 <span class="lbl-photobook-<?= $type ?>"><?= $type === 'mariage' ? 'Photo book 100 photos' : 'Photo book 50 photos' ?></span>
+                                </label>
+                                <span class="cfg-sub"><?= $type === 'mariage' ? '+250 DT' : '+150 DT' ?></span>
+                            </div>
+
+                            <div class="cfg-row" style="flex-direction:column; align-items:flex-start; gap:6px; padding-top:6px;">
+                                <label class="cfg-label" style="color:#999;">🚗 <span class="lbl-transport">Localisation</span></label>
+                                <div style="width:100%; display:flex; flex-direction:column; gap:6px;">
+                                    <div class="select-wrapper" style="margin-bottom:0;">
+                                        <select class="cfg-gov-select" onchange="updateCardDelegations(this)" data-type="<?= $type ?>" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.85rem; padding:8px 28px 8px 10px; cursor:pointer; outline:none; border-radius:4px;">
+                                            <option value="">-- Gouvernorat --</option>
+                                        </select>
+                                    </div>
+                                    <div class="select-wrapper" style="margin-bottom:0;">
+                                        <select class="cfg-del-select" id="cfg-del-<?= $type ?>" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.85rem; padding:8px 28px 8px 10px; cursor:pointer; outline:none; border-radius:4px;">
+                                            <option value="">-- Délégation --</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="cfg-total-wrap">
                                 <span class="cfg-total-label lbl-total-estime">Total estimé</span>
-                                <span class="cfg-total-price" id="cfg-total-<?= $type ?>">400 DT</span>
+                                <span class="cfg-total-price" id="cfg-total-<?= $type ?>">450 DT</span>
                             </div>
                         </div>
                     </div>
@@ -682,6 +741,15 @@ function setLang(lang) {
             'pkg1-label':"Choix 1 — 1 caméra + appareil photo",'pkg2-label':"Choix 2 — 2 caméras + appareil photo",'pkg3-label':"Choix 3 — 2 caméras + appareil + drone",
             'lbl-prix-shoot-ind':"Prix fixe",'lbl-prix-shoot-mar':"Prix fixe",
             'btn-reserver-shoot-ind':"Réserver",'btn-reserver-shoot-mar':"Réserver",
+            'btn-text-shoot-ind':"Réserver",'btn-text-shoot-mar':"Réserver",
+            'lbl-photo-si':"Appareil photo",'lbl-photo-sm':"Appareil photo",
+            'lbl-cam-si':"Caméras",'lbl-cam-sm':"Caméras",
+            'lbl-drone-si':"Drone",'lbl-drone-sm':"Drone",
+            'lbl-girafe-si':"Girafe photography",'lbl-girafe-sm':"Girafe photography",
+            'lbl-transport-si':"Transport",'lbl-transport-sm':"Transport",
+            'lbl-sans-transport-si':"Sans transport",'lbl-sans-transport-sm':"Sans transport",
+            'lbl-total-si':"Total estimé",'lbl-total-sm':"Total estimé",
+            'svc-shooting-price':"à partir de 450 DT",
             'btn-reserver-wtiya':"Réserver",'btn-reserver-henna':"Réserver",'btn-reserver-mariage':"Réserver",'btn-reserver-event':"Réserver",
             'pkg1-wtiya':"1 caméra + appareil photo",'pkg2-wtiya':"2 caméras + appareil photo",'pkg3-wtiya':"2 caméras + appareil + drone",
             'pkg1-henna':"1 caméra + appareil photo",'pkg2-henna':"2 caméras + appareil photo",'pkg3-henna':"2 caméras + appareil + drone",
@@ -711,6 +779,15 @@ function setLang(lang) {
             'pkg1-label':"Choice 1 — 1 camera + photo",'pkg2-label':"Choice 2 — 2 cameras + photo",'pkg3-label':"Choice 3 — 2 cameras + drone",
             'lbl-prix-shoot-ind':"Fixed price",'lbl-prix-shoot-mar':"Fixed price",
             'btn-reserver-shoot-ind':"Book",'btn-reserver-shoot-mar':"Book",
+            'btn-text-shoot-ind':"Book",'btn-text-shoot-mar':"Book",
+            'lbl-photo-si':"Camera",'lbl-photo-sm':"Camera",
+            'lbl-cam-si':"Cameras",'lbl-cam-sm':"Cameras",
+            'lbl-drone-si':"Drone",'lbl-drone-sm':"Drone",
+            'lbl-girafe-si':"Girafe photography",'lbl-girafe-sm':"Girafe photography",
+            'lbl-transport-si':"Transport",'lbl-transport-sm':"Transport",
+            'lbl-sans-transport-si':"Without transport",'lbl-sans-transport-sm':"Without transport",
+            'lbl-total-si':"Estimated total",'lbl-total-sm':"Estimated total",
+            'svc-shooting-price':"from 450 DT",
             'btn-reserver-wtiya':"Book",'btn-reserver-henna':"Book",'btn-reserver-mariage':"Book",'btn-reserver-event':"Book",
             'pkg1-wtiya':"1 camera + photo",'pkg2-wtiya':"2 cameras + photo",'pkg3-wtiya':"2 cameras + drone",
             'pkg1-henna':"1 camera + photo",'pkg2-henna':"2 cameras + photo",'pkg3-henna':"2 cameras + drone",
@@ -730,7 +807,7 @@ function setLang(lang) {
             'lbl-phone1':"هاتف",'lbl-phone2':"هاتف",'lbl-email':"البريد الإلكتروني",
             'modal-lbl-cameras':"📹 كاميرات الفيديو",
             'modal-lbl-cam1':"كاميرا واحدة",'modal-lbl-cam2':"كاميرتان",
-            'modal-lbl-drone':"طائرة مسيّرة",'modal-lbl-girafe':"تصوير جيراف",
+            'modal-lbl-drone':"درون",'modal-lbl-girafe':"تصوير جيراف",
             'modal-lbl-transport':"النقل",'modal-lbl-sans-transport':"السعر بدون نقل",
             'footer-rights':"© "+new Date().getFullYear()+" Milano Studio — جميع الحقوق محفوظة",
             'galleryTitle':"معرض الصور",
@@ -740,6 +817,15 @@ function setLang(lang) {
             'pkg1-label':"الباقة 1 — كاميرا + آلة تصوير",'pkg2-label':"الباقة 2 — كاميرتان + آلة تصوير",'pkg3-label':"الباقة 3 — كاميرتان + آلة + درون",
             'lbl-prix-shoot-ind':"السعر",'lbl-prix-shoot-mar':"السعر",
             'btn-reserver-shoot-ind':"احجز",'btn-reserver-shoot-mar':"احجز",
+            'btn-text-shoot-ind':"احجز",'btn-text-shoot-mar':"احجز",
+            'lbl-photo-si':"آلة تصوير",'lbl-photo-sm':"آلة تصوير",
+            'lbl-cam-si':"كاميرات",'lbl-cam-sm':"كاميرات",
+            'lbl-drone-si':"درون",'lbl-drone-sm':"درون",
+            'lbl-girafe-si':"تصوير جيراف",'lbl-girafe-sm':"تصوير جيراف",
+            'lbl-transport-si':"النقل",'lbl-transport-sm':"النقل",
+            'lbl-sans-transport-si':"بدون نقل",'lbl-sans-transport-sm':"بدون نقل",
+            'lbl-total-si':"المجموع التقديري",'lbl-total-sm':"المجموع التقديري",
+            'svc-shooting-price':"ابتداءً من 450 دينار",
             'btn-reserver-wtiya':"احجز",'btn-reserver-henna':"احجز",'btn-reserver-mariage':"احجز",'btn-reserver-event':"احجز",
             'pkg1-wtiya':"1 كاميرا + آلة تصوير",'pkg2-wtiya':"2 كاميرات + آلة تصوير",'pkg3-wtiya':"2 كاميرات + آلة + درون",
             'pkg1-henna':"1 كاميرا + آلة تصوير",'pkg2-henna':"2 كاميرات + آلة تصوير",'pkg3-henna':"2 كاميرات + آلة + درون",
@@ -761,7 +847,7 @@ function setLang(lang) {
     const classTexts = {
         fr: { 'lbl-drone':'Drone', 'lbl-girafe':'Girafe photography', 'lbl-transport':'Transport', 'lbl-sans-transport':'Prix sans transport', 'lbl-total-estime':'Total estimé' },
         en: { 'lbl-drone':'Drone', 'lbl-girafe':'Girafe photography', 'lbl-transport':'Transport', 'lbl-sans-transport':'Price without transport', 'lbl-total-estime':'Estimated total' },
-        ar: { 'lbl-drone':'طائرة مسيّرة', 'lbl-girafe':'تصوير جيراف', 'lbl-transport':'النقل', 'lbl-sans-transport':'السعر بدون نقل', 'lbl-total-estime':'المجموع التقديري' },
+        ar: { 'lbl-drone':'درون', 'lbl-girafe':'تصوير جيراف', 'lbl-transport':'النقل', 'lbl-sans-transport':'السعر بدون نقل', 'lbl-total-estime':'المجموع التقديري' },
     };
     const ct = classTexts[lang];
     if (ct) Object.entries(ct).forEach(([cls, txt]) => { document.querySelectorAll('.' + cls).forEach(el => el.innerText = txt); });
@@ -789,9 +875,60 @@ function openModal(label, value) {
     document.getElementById('modal-package-label').innerText = label;
     document.getElementById('modal-package-input').value = value;
     const isW = ['wtiya','henna','mariage'].includes(value);
-    document.getElementById('modal-type-group').style.display = isW ? 'block' : 'none';
-    document.getElementById('modal-prix-group').style.display = isW ? 'block' : 'none';
-    if (isW) document.getElementById('modal-wedding-type').value = value;
+    const isShooting = ['shoot-ind','shoot-mar','event'].includes(value);
+
+    // Safe show/hide (elements may have been removed)
+    const safeDisplay = (id, show) => { const el = document.getElementById(id); if (el) el.style.display = show ? 'block' : 'none'; };
+    safeDisplay('modal-type-group', isW);
+    safeDisplay('modal-prix-group', false); // always hidden — removed from UI
+
+    // Show/hide camera+drone group only for wedding
+    const camGroup = document.getElementById('modal-cam-group');
+    if (camGroup) camGroup.style.display = isW ? 'block' : 'none';
+    // Hide photobook for non-wedding or henna
+    const pbRow2 = document.getElementById('modal-photobook-row');
+    if (pbRow2) pbRow2.style.display = (isW && value !== 'henna') ? 'flex' : 'none';
+    const pbChk2 = document.getElementById('modal-photobook');
+    if (pbChk2) pbChk2.checked = false;
+
+    if (isW) {
+        const wType = document.getElementById('modal-wedding-type');
+        if (wType) wType.value = value;
+        // Reset camera/drone selections to default
+        const cam1    = document.getElementById('modal-cam-1');
+        const droneEl = document.getElementById('modal-drone');
+        const girEl   = document.getElementById('modal-girafe');
+        if (cam1)    cam1.checked    = true;
+        if (droneEl) droneEl.checked = false;
+        if (girEl)   girEl.checked   = false;
+        const disp = document.getElementById('modal-total-display');
+        const inp  = document.getElementById('modal-total-price');
+        if (disp) disp.textContent = '400 DT';
+        if (inp)  inp.value = '400';
+    }
+
+    if (isShooting) {
+        const disp = document.getElementById('modal-total-display');
+        const inp  = document.getElementById('modal-total-price');
+        if (disp) disp.textContent = '250 DT';
+        if (inp)  inp.value = '250';
+        // Set clear package description for shooting
+        const pkgInput = document.getElementById('modal-package-input');
+        if (pkgInput) pkgInput.value = label + ' — appareil photo — 200 DT';
+    }
+
+    const origInput = document.getElementById('modal-type-original');
+    if (origInput) origInput.value = value;
+    // Clear all form fields for fresh reservation
+    ['m_nom_homme','m_nom_femme','m_telephone','m_cin','m_date_soiree'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    const resIdEl = document.getElementById('modal-res-id');
+    if (resIdEl) resIdEl.value = '';
+    const dispoMsg = document.getElementById('dispo-msg');
+    if (dispoMsg) dispoMsg.textContent = '';
+    const editOverlay = document.getElementById('modal-overlay');
+    if (editOverlay) delete editOverlay.dataset.editIdx;
     updateNomFields(value);
     document.getElementById('modal-overlay').style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -814,19 +951,85 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && document.getElementById('modal-overlay').style.display === 'flex') closeModal();
 });
 
-// CONFIGURATEUR PRIX
+// CONFIGURATEUR PRIX — WEDDING
 const cfgState = {
-    wtiya:   { drone: 0, girafe: 0 },
-    henna:   { drone: 0, girafe: 0 },
-    mariage: { drone: 0, girafe: 0 },
+    wtiya:   { drone: 0, girafe: 0, photobook: 0 },
+    henna:   { drone: 0, girafe: 0, photobook: 0 },
+    mariage: { drone: 0, girafe: 0, photobook: 0 },
 };
+
+// CONFIGURATEUR PRIX — SHOOTING
+const shootState = {
+    si: { cam: 1, drone: false, girafe: false },
+    sm: { cam: 1, drone: false, girafe: false },
+};
+
+function calcShootTotal(id) {
+    const s = shootState[id];
+    let total = 400;
+    if (s.cam === 2) total += 150;
+    if (s.drone) total += 350;
+    if (s.girafe) total += 500;
+    return total;
+}
+
+function setShootCfg(id, field, val, btn) {
+    shootState[id][field] = val;
+    // Update active state on cam buttons
+    if (field === 'cam') {
+        document.getElementById(id + '-cam-1').classList.toggle('active', val === 1);
+        document.getElementById(id + '-cam-2').classList.toggle('active', val === 2);
+    }
+    updateShootTotal(id);
+}
+
+function updateShootTotal(id) {
+    shootState[id].drone  = document.getElementById(id + '-drone')?.checked  || false;
+    shootState[id].girafe = document.getElementById(id + '-girafe')?.checked || false;
+    const total = calcShootTotal(id);
+    const el = document.getElementById('cfg-total-' + id);
+    if (el) {
+        el.style.transform = 'scale(1.15)';
+        el.textContent = total + ' DT';
+        setTimeout(() => el.style.transform = 'scale(1)', 280);
+    }
+}
+
+function openShootModal(label, type, id) {
+    _modalType = type;
+    const s = shootState[id];
+    // Sync modal camera radios to card state
+    const cam1 = document.getElementById('modal-cam-1');
+    const cam2 = document.getElementById('modal-cam-2');
+    if (cam1) cam1.checked = (s.cam === 1);
+    if (cam2) cam2.checked = (s.cam === 2);
+    // Sync drone/girafe
+    const droneEl  = document.getElementById('modal-drone');
+    const girafeEl = document.getElementById('modal-girafe');
+    if (droneEl)  droneEl.checked  = s.drone;
+    if (girafeEl) girafeEl.checked = s.girafe;
+    // Show camera group in modal
+    const camGroup = document.getElementById('modal-cam-group');
+    if (camGroup) camGroup.style.display = 'block';
+    updateModalTotal();
+    // Shooting: hide wedding type selector, show package label
+    const _tg = document.getElementById('modal-type-group'); if(_tg) _tg.style.display = 'none';
+        document.getElementById('modal-package-label').innerText = label;
+    document.getElementById('modal-package-input').value = type;
+    document.getElementById('modal-wedding-type').value = '';
+    updateNomFields(type);
+    document.getElementById('modal-overlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+}
 
 function calcTotal(type, cam) {
     const s = cfgState[type];
-    let total = 400;
-    if (cam === 2) total += 150;
-    if (s.drone) total += 350;
-    if (s.girafe) total += 500;
+    let total = 450;
+    if (cam === 2) total += 250;
+    if (s.drone) total += 400;
+    if (s.girafe) total += 450;
+    if (s.photobook) total += (type === 'mariage' ? 250 : 150);
     return total;
 }
 
@@ -844,18 +1047,22 @@ function updateModalTotal() {
     const cam = document.getElementById('modal-cam-2')?.checked ? 2 : 1;
     const drone = document.getElementById('modal-drone')?.checked ? 1 : 0;
     const girafe = document.getElementById('modal-girafe')?.checked ? 1 : 0;
-    let total = 400;
-    if (cam === 2) total += 150;
-    if (drone) total += 350;
-    if (girafe) total += 500;
+    const pbType = document.getElementById('modal-type-original')?.value || '';
+    const photobook = document.getElementById('modal-photobook')?.checked ? 1 : 0;
+    let total = 450;
+    if (cam === 2) total += 250;
+    if (drone) total += 400;
+    if (girafe) total += 450;
+    if (photobook) total += (pbType === 'mariage' ? 250 : 150);
     const display = document.getElementById('modal-total-display');
     const input = document.getElementById('modal-total-price');
     if (display) { display.textContent = total + ' DT'; }
     if (input) { input.value = total; }
     // Update package label summary
-    const parts = [cam === 1 ? '1 caméra' : '2 caméras', 'appareil photo'];
+    const parts = [cam === 1 ? '1 caméra' : '2 caméras', 'photo illimité clé USB + montage vidéo'];
     if (drone) parts.push('drone');
     if (girafe) parts.push('girafe');
+    if (photobook) parts.push(pbType === 'mariage' ? 'photo book 100 photos' : 'photo book 50 photos');
     const label = document.getElementById('modal-package-label');
     if (label) label.innerText = parts.join(' + ') + ' — ' + total + ' DT (sans transport)';
     const pkgInput = document.getElementById('modal-package-input');
@@ -864,6 +1071,8 @@ function updateModalTotal() {
 
 function openModalCfg(label, type) {
     _modalType = type;
+    const origInput = document.getElementById('modal-type-original');
+    if (origInput) origInput.value = type;
     const s = cfgState[type];
     // Reset camera to 1 and uncheck options
     const cam1 = document.getElementById('modal-cam-1');
@@ -877,10 +1086,23 @@ function openModalCfg(label, type) {
     // Show/hide camera group only for wedding types
     const camGroup = document.getElementById('modal-cam-group');
     if (camGroup) camGroup.style.display = ['wtiya','henna','mariage'].includes(type) ? 'block' : 'none';
+    // Show/hide photobook row + update label and price
+    const pbRow = document.getElementById('modal-photobook-row');
+    const pbLbl = document.getElementById('modal-lbl-photobook');
+    const pbPrice = document.getElementById('modal-photobook-price');
+    const pbChk = document.getElementById('modal-photobook');
+    if (pbRow) pbRow.style.display = type === 'henna' ? 'none' : 'flex';
+    if (pbChk) pbChk.checked = false;
+    if (type === 'mariage') {
+        if (pbLbl) pbLbl.textContent = 'Photo book 100 photos';
+        if (pbPrice) pbPrice.innerHTML = '<b>+250 DT</b>';
+    } else {
+        if (pbLbl) pbLbl.textContent = 'Photo book 50 photos';
+        if (pbPrice) pbPrice.innerHTML = '<b>+150 DT</b>';
+    }
     updateModalTotal();
-    document.getElementById('modal-type-group').style.display = 'block';
-    document.getElementById('modal-prix-group').style.display = 'none';
-    document.getElementById('modal-wedding-type').value = type;
+    const _tg2 = document.getElementById('modal-type-group'); if(_tg2) _tg2.style.display = 'block';
+        document.getElementById('modal-wedding-type').value = type;
     updateNomFields(type);
     document.getElementById('modal-overlay').style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -895,8 +1117,9 @@ function openLightbox(idx) {
     document.getElementById('lb-counter').textContent = (lbIndex + 1) + ' / ' + allPhotos.length;
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 }
-function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; }
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; document.documentElement.style.overflow = ''; }
 function lbNavigate(dir) {
     lbIndex = (lbIndex + dir + allPhotos.length) % allPhotos.length;
     document.getElementById('lb-img').src = allPhotos[lbIndex];
@@ -919,6 +1142,470 @@ document.getElementById('m_date_soiree').addEventListener('change', async functi
         else { msg.style.color='#4caf7d'; msg.textContent='✓ Date disponible ('+data.count+'/4)'; this.setCustomValidity(''); }
     } catch(e) { msg.textContent = ''; }
 });
+</script>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+        <div>
+            <h3 class="cart-title" id="cart-title-label">🛒 Mes Réservations</h3>
+            <p class="cart-sub" id="cart-sub-label">Votre panier de soirées</p>
+        </div>
+        <button class="cart-close" onclick="toggleCart()">✕</button>
+    </div>
+
+    <div class="cart-body" id="cart-body">
+        <div class="cart-empty" id="cart-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <p id="cart-empty-text">Aucune réservation pour l'instant</p>
+        </div>
+        <div id="cart-items"></div>
+    </div>
+
+    <div class="cart-footer" id="cart-footer" style="display:none;">
+        <div class="cart-total-row">
+            <span id="cart-total-lbl">Total estimé</span>
+            <span class="cart-total-amount" id="cart-grand-total">0 DT</span>
+        </div>
+        <p class="cart-note" id="cart-note-text">* Sans transport · Hors options supplémentaires</p>
+        <button class="cart-clear-btn" id="cart-clear-btn" onclick="cartClear()">
+            <span id="cart-clear-lbl">🗑 Vider le panier</span>
+        </button>
+    </div>
+</aside>
+
+<style>
+/* CART BUTTON */
+.cart-btn { position:relative; background:none; border:1px solid rgba(0,0,0,0.15); color:var(--text); width:40px; height:40px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.25s; }
+.cart-btn:hover { border-color:var(--red); color:var(--red); background:var(--red-light); }
+.cart-count { position:absolute; top:-7px; right:-7px; background:var(--red); color:#fff; font-family:'Montserrat',sans-serif; font-size:0.58rem; font-weight:700; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:transform 0.3s; }
+.cart-count.pop { transform:scale(1.5); }
+.cart-count[data-count="0"] { display:none; }
+
+/* OVERLAY */
+.cart-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:1099; opacity:0; pointer-events:none; transition:opacity 0.35s; }
+.cart-overlay.open { opacity:1; pointer-events:all; }
+
+/* SIDEBAR */
+.cart-sidebar { position:fixed; top:0; right:0; width:380px; max-width:95vw; height:100vh; background:#fff; z-index:1100; display:flex; flex-direction:column; box-shadow:-4px 0 40px rgba(0,0,0,0.12); transform:translateX(100%); transition:transform 0.38s cubic-bezier(0.4,0,0.2,1); }
+.cart-sidebar.open { transform:translateX(0); }
+
+.cart-header { display:flex; align-items:flex-start; justify-content:space-between; padding:28px 24px 20px; border-bottom:1px solid rgba(0,0,0,0.08); }
+.cart-title { font-family:'Dancing Script',cursive; font-size:1.6rem; color:var(--text); }
+.cart-sub { font-family:'Montserrat',sans-serif; font-size:0.58rem; letter-spacing:0.15em; color:var(--gray); text-transform:uppercase; margin-top:2px; }
+.cart-close { background:none; border:none; color:#aaa; font-size:1.3rem; cursor:pointer; padding:4px; transition:color 0.2s; line-height:1; }
+.cart-close:hover { color:var(--red); }
+
+.cart-body { flex:1; overflow-y:auto; padding:20px 24px; }
+.cart-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; height:200px; color:#bbb; }
+.cart-empty p { font-family:'Montserrat',sans-serif; font-size:0.7rem; letter-spacing:0.1em; }
+
+/* CART ITEM */
+.cart-item { background:var(--off-white); border:1px solid rgba(0,0,0,0.07); border-radius:10px; padding:16px; margin-bottom:12px; position:relative; border-left:3px solid var(--red); }
+.cart-item-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.cart-item-name { font-family:'Dancing Script',cursive; font-size:1.25rem; color:var(--text); }
+.cart-item-delete { background:none; border:none; color:#ccc; cursor:pointer; font-size:1rem; transition:color 0.2s; padding:2px 6px; }
+.cart-item-delete:hover { color:var(--red); }
+.cart-item-row { display:flex; align-items:center; justify-content:space-between; padding:5px 0; border-bottom:1px solid rgba(0,0,0,0.05); font-family:'Cormorant Garamond',serif; font-size:0.95rem; color:var(--text-light); }
+.cart-item-row:last-of-type { border-bottom:none; }
+.cart-item-row span:last-child { color:var(--red); font-weight:600; font-family:'Montserrat',sans-serif; font-size:0.72rem; }
+.cart-item-total { display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid rgba(227,30,36,0.15); }
+.cart-item-total-lbl { font-family:'Montserrat',sans-serif; font-size:0.58rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--gray); }
+.cart-item-total-price { font-family:'Dancing Script',cursive; font-size:1.5rem; color:var(--red); font-weight:700; }
+.cart-item-date { font-family:'Montserrat',sans-serif; font-size:0.6rem; color:var(--gray); letter-spacing:0.08em; margin-top:6px; }
+
+/* FOOTER */
+.cart-footer { padding:20px 24px; border-top:2px solid rgba(227,30,36,0.12); background:#fafafa; }
+.cart-total-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; font-family:'Montserrat',sans-serif; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray); }
+.cart-total-amount { font-family:'Dancing Script',cursive; font-size:2rem; color:var(--red); font-weight:700; }
+.cart-note { font-family:'Montserrat',sans-serif; font-size:0.55rem; color:#bbb; letter-spacing:0.08em; margin-bottom:14px; }
+.cart-confirm-btn { width:100%; background:var(--red); color:#fff; border:none; padding:14px; font-family:'Montserrat',sans-serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; border-radius:6px; transition:background 0.25s; margin-bottom:8px; }
+.cart-confirm-btn:hover { background:var(--red-dark); }
+.cart-clear-btn { width:100%; background:none; color:#aaa; border:1px solid rgba(0,0,0,0.1); padding:10px; font-family:'Montserrat',sans-serif; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; border-radius:6px; transition:all 0.2s; }
+.cart-clear-btn:hover { border-color:var(--red); color:var(--red); }
+.cart-edit-btn { width:100%; margin-top:10px; background:none; border:1px solid rgba(227,30,36,0.3); color:var(--red); padding:8px; font-family:'Montserrat',sans-serif; font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; border-radius:6px; transition:all 0.2s; }
+.cart-edit-btn:hover { background:var(--red-light); }
+</style>
+
+<script>
+// ===================== CART SYSTEM =====================
+let cart = JSON.parse(localStorage.getItem('milano_cart') || '[]');
+
+function saveCart() { localStorage.setItem('milano_cart', JSON.stringify(cart)); }
+
+function toggleCart() {
+    const sidebar = document.getElementById('cart-sidebar');
+    const overlay = document.getElementById('cart-overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+    renderCart();
+}
+
+function addToCart(item) {
+    cart.push(item);
+    saveCart();
+    updateCartCount();
+    // Pop animation
+    const count = document.getElementById('cart-count');
+    count.classList.add('pop');
+    setTimeout(() => count.classList.remove('pop'), 400);
+}
+
+function removeFromCart(idx) {
+    cart.splice(idx, 1);
+    saveCart();
+    updateCartCount();
+    renderCart();
+}
+
+function cartClear() {
+    cart = [];
+    saveCart();
+    updateCartCount();
+    renderCart();
+}
+
+function updateCartCount() {
+    const el = document.getElementById('cart-count');
+    el.textContent = cart.length;
+    el.dataset.count = cart.length;
+    document.getElementById('cart-btn').style.color = cart.length > 0 ? 'var(--red)' : '';
+    document.getElementById('cart-btn').style.borderColor = cart.length > 0 ? 'var(--red)' : '';
+}
+
+function renderCart() {
+    const body = document.getElementById('cart-items');
+    const empty = document.getElementById('cart-empty');
+    const footer = document.getElementById('cart-footer');
+    body.innerHTML = '';
+    if (cart.length === 0) {
+        empty.style.display = 'flex';
+        footer.style.display = 'none';
+        return;
+    }
+    empty.style.display = 'none';
+    footer.style.display = 'block';
+    let grand = 0;
+    cart.forEach((item, idx) => {
+        grand += item.total;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        let rows = '';
+        if (item.cameras) rows += `<div class="cart-item-row"><span>📹 ${item.cameras}</span><span>${item.cam_price} DT</span></div>`;
+        if (item.drone)   rows += `<div class="cart-item-row"><span>🚁 Drone</span><span>+400 DT</span></div>`;
+        if (item.girafe)  rows += `<div class="cart-item-row"><span>🦒 Girafe photography</span><span>+450 DT</span></div>`;
+        if (item.photobook) rows += `<div class="cart-item-row"><span>📒 Photo book</span><span>+${item.type==='mariage'?250:150} DT</span></div>`;
+        rows += `<div class="cart-item-row"><span>📸 Appareil photo</span><span>Inclus</span></div>`;
+        div.innerHTML = `
+            <div class="cart-item-header">
+                <span class="cart-item-name">${item.name}</span>
+                <button class="cart-item-delete" onclick="removeFromCart(${idx})">✕</button>
+            </div>
+            ${rows}
+            <div class="cart-item-total">
+                <span class="cart-item-total-lbl">Total</span>
+                <span class="cart-item-total-price">${item.total} DT</span>
+            </div>
+            ${item.date ? `<div class="cart-item-date">📅 ${item.date}</div>` : ''}
+        `;
+        body.appendChild(div);
+    });
+    document.getElementById('cart-grand-total').textContent = grand + ' DT';
+}
+
+function cartConfirmAll() {
+    if (cart.length === 0) return;
+    // Open edit modal for first pending item
+    const item = cart[0];
+    openCartEdit(item, 0);
+    toggleCart();
+}
+
+function cartEditItem(idx) {
+    // Close cart sidebar first, then open edit modal
+    const sidebar = document.getElementById('cart-sidebar');
+    const overlay = document.getElementById('cart-overlay');
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    setTimeout(() => openCartEdit(cart[idx], idx), 50);
+}
+
+function openCartEdit(item, idx) {
+    // openModal resets all fields — call it first, then override with cart item data
+    openModal(item.name, item.type);
+
+    // Override form fields with saved cart data (always set, even empty string)
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+    setVal('m_nom_homme', item.nom_homme);
+    setVal('m_nom_femme', item.nom_femme);
+    setVal('m_telephone', item.telephone);
+    setVal('m_cin',       item.cin || '');
+    setVal('m_date_soiree', item.date);
+
+    // Restore camera/drone/girafe options for wedding types
+    const isWedding = ['wtiya','henna','mariage'].includes(item.type);
+    if (isWedding) {
+        const cam1   = document.getElementById('modal-cam-1');
+        const cam2   = document.getElementById('modal-cam-2');
+        const droneEl  = document.getElementById('modal-drone');
+        const girafeEl = document.getElementById('modal-girafe');
+        const is2cam = item.cameras === '2 caméras';
+        if (cam1) cam1.checked = !is2cam;
+        if (cam2) cam2.checked = is2cam;
+        if (droneEl)  droneEl.checked  = !!item.drone;
+        if (girafeEl) girafeEl.checked = !!item.girafe;
+        const pbChkEdit = document.getElementById('modal-photobook');
+        if (pbChkEdit) pbChkEdit.checked = !!item.photobook;
+        updateModalTotal(); // recalculate with restored values
+    }
+
+    // Set res_id so traitement_devis.php does UPDATE instead of INSERT
+    const resIdInput = document.getElementById('modal-res-id');
+    if (resIdInput) resIdInput.value = item.res_id || '';
+
+    // Mark this modal as editing cart item at index idx
+    document.getElementById('modal-overlay').dataset.editIdx = idx;
+}
+
+function renderCart() {
+    const body = document.getElementById('cart-items');
+    const empty = document.getElementById('cart-empty');
+    const footer = document.getElementById('cart-footer');
+    body.innerHTML = '';
+    if (cart.length === 0) {
+        empty.style.display = 'flex';
+        footer.style.display = 'none';
+        return;
+    }
+    empty.style.display = 'none';
+    footer.style.display = 'block';
+    let grand = 0;
+    cart.forEach((item, idx) => {
+        grand += item.total;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        let rows = '';
+        if (item.cameras) rows += `<div class="cart-item-row"><span>📹 ${item.cameras}</span><span>${item.cam_price} DT</span></div>`;
+        if (item.drone)   rows += `<div class="cart-item-row"><span>🚁 Drone</span><span>+400 DT</span></div>`;
+        if (item.girafe)  rows += `<div class="cart-item-row"><span>🦒 Girafe photography</span><span>+450 DT</span></div>`;
+        if (item.photobook) rows += `<div class="cart-item-row"><span>📒 Photo book</span><span>+${item.type==='mariage'?250:150} DT</span></div>`;
+        rows += `<div class="cart-item-row"><span>📸 Appareil photo</span><span style="color:#4caf7d;">Inclus</span></div>`;
+        rows += `<div class="cart-item-row"><span>📀 Photo illimité clé USB</span><span style="color:#4caf7d;">Inclus</span></div>`;
+        div.innerHTML = `
+            <div class="cart-item-header">
+                <span class="cart-item-name">${item.name}</span>
+                <button class="cart-item-delete" onclick="removeFromCart(${idx})" title="Supprimer">✕</button>
+            </div>
+            ${rows}
+            <div class="cart-item-total">
+                <span class="cart-item-total-lbl">Total</span>
+                <span class="cart-item-total-price">${item.total} DT</span>
+            </div>
+            ${item.date ? `<div class="cart-item-date">📅 ${item.date}</div>` : ''}
+            <button class="cart-edit-btn" onclick="cartEditItem(${idx});">✏️ Modifier</button>
+        `;
+        body.appendChild(div);
+    });
+    document.getElementById('cart-grand-total').textContent = grand + ' DT';
+}
+
+function cartSaveFromModal() {
+    const pkg    = document.getElementById('modal-type-original')?.value || document.getElementById('modal-package-input')?.value || '';
+    const title  = document.getElementById('modal-package-label')?.innerText || pkg;
+    const date   = document.getElementById('m_date_soiree')?.value || '';
+    const cam    = document.getElementById('modal-cam-2')?.checked ? 2 : 1;
+    const drone  = document.getElementById('modal-drone')?.checked || false;
+    const girafe = document.getElementById('modal-girafe')?.checked || false;
+    const isWedding = ['wtiya','henna','mariage'].includes(pkg);
+    const isShooting = ['shoot-ind','shoot-mar'].includes(pkg);
+
+    const photobook = document.getElementById('modal-photobook')?.checked || false;
+    const pbType = document.getElementById('modal-type-original')?.value || '';
+    let total = isWedding ? 450 : 250;
+    let cam_price = null;
+    let cameras = null;
+
+    if (isWedding) {
+        cam_price = cam === 1 ? 450 : 700;
+        cameras = cam === 1 ? '1 caméra' : '2 caméras';
+        total = cam_price;
+        if (drone)     total += 400;
+        if (girafe)    total += 450;
+        if (photobook) total += (pbType === 'mariage' ? 250 : 150);
+    }
+
+    // Get reservation ID if editing
+    const resId = document.getElementById('modal-res-id')?.value || null;
+
+    // Get edit index if modifying existing
+    const editIdx = document.getElementById('modal-overlay').dataset.editIdx;
+    const newItem = {
+        res_id: resId,
+        name: pkg === 'shoot-ind' ? 'Shooting Individuel' : pkg === 'shoot-mar' ? 'Shooting Mariage' : title.split('—')[0].trim(),
+        type: pkg,
+        date: date,
+        nom_homme: document.getElementById('m_nom_homme')?.value || '',
+        nom_femme: document.getElementById('m_nom_femme')?.value || '',
+        telephone: document.getElementById('m_telephone')?.value || '',
+        cameras: cameras,
+        cam_price: cam_price,
+        drone: isWedding ? drone : false,
+        girafe: isWedding ? girafe : false,
+        photobook: isWedding ? photobook : false,
+        total: total,
+    };
+    if (editIdx !== undefined && editIdx !== '' && cart[editIdx] !== undefined) {
+        // Keep original name from cart item (don't re-derive from garbled label)
+        newItem.name = cart[editIdx].name;
+        cart[editIdx] = newItem;
+        delete document.getElementById('modal-overlay').dataset.editIdx;
+        saveCart();
+        updateCartCount();
+        // Pop animation to signal update
+        const countEl = document.getElementById('cart-count');
+        if (countEl) { countEl.classList.add('pop'); setTimeout(() => countEl.classList.remove('pop'), 400); }
+    } else {
+        addToCart(newItem);
+    }
+}
+
+// Init on load
+updateCartCount();
+
+// After form submission, update cart item with real DB res_id
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const retId  = parseInt(params.get('res_id') || '0');
+    const updated = params.get('updated') === '1';
+    if (!retId) return;
+
+    if (updated) {
+        // Modification — res_id already in cart, just refresh display
+        renderCart && renderCart();
+    } else {
+        // New INSERT — find cart item with no res_id and assign the new DB id
+        let changed = false;
+        cart.forEach(item => {
+            if (!item.res_id) { item.res_id = retId; changed = true; }
+        });
+        if (changed) { saveCart(); updateCartCount(); }
+    }
+    // Clean URL
+    const url = new URL(window.location);
+    url.searchParams.delete('res_id');
+    url.searchParams.delete('updated');
+    history.replaceState({}, '', url);
+})();
+
+// ── TUNISIA DATA — Gouvernorats & Délégations ───────────────────────────────
+const TUNISIA_DATA = {
+  "Ariana":["Ariana Ville","Ettadhamen","Kalâat el-Andalous","La Soukra","Mnihla","Raoued","Sidi Thabet"],
+  "Béja":["Amdoun","Béja Nord","Béja Sud","Goubellat","Medjez el-Bab","Nefza","Téboursouk","Testour","Thibar"],
+  "Ben Arous":["Ben Arous","Bou Mhel el-Bassatine","El Mourouj","Ezzahra","Fouchana","Hammam Chott","Hammam Lif","Khalidia","Medina Jedida","Mégrine","Mohamedia","Mornag","Nouvelle Medina","Radès"],
+  "Bizerte":["Bizerte Nord","Bizerte Sud","El Alia","Ghar El Melh","Ghezala","Joumine","Mateur","Menzel Bourguiba","Menzel Jemil","Ras Jebel","Sejnane","Tinja","Utique"],
+  "Gabès":["El Hamma","Gabès Medina","Gabès Ouest","Gabès Sud","Ghannouch","Mareth","Matmata","Menzel El Habib","Métouia","Nouvelle Matmata"],
+  "Gafsa":["Belkhir","El Guettar","El Ksar","Gafsa Nord","Gafsa Sud","Mdhilla","Métlaoui","Moularès","Redeyef","Sened","Sidi Aïch"],
+  "Jendouba":["Aïn Draham","Balta-Bou Aouane","Bou Salem","El Jendouba","El Jendouba Nord","Fernana","Ghardimaou","Oued Meliz","Tabarka"],
+  "Kairouan":["Bou Hajla","Chebika","Cherarda","El Ouslatia","Haffouz","Hajeb El Ayoun","Kairouan Nord","Kairouan Sud","Nasrallah","Oued Haffouz","Sbikha"],
+  "Kasserine":["Aïn Jedey","El Ayoun","Ezzouhour","Foussana","Fériana","Hassi El Frid","Hidra","Jedelienne","Kasserine Nord","Kasserine Sud","Majel Bel Abbès","Sbeïtla","Sbitla","Thélepte"],
+  "Kébili":["Douz Nord","Douz Sud","El Faouar","Kébili Nord","Kébili Sud","Souk Lahad"],
+  "Kef":["Dahmani","El Ksour","Jerissa","Kef Est","Kef Ouest","Nebeur","Sakiet Sidi Youssef","Sers","Tajerouine","Touiref"],
+  "Mahdia":["Bou Merdes","Chebba","Chorbane","El Bradaa","Essouassi","Hebira","Ksour Essaf","Mahdia","Melloulèche","Ouled Chamekh","Sidi Alouane"],
+  "Manouba":["Borj El Amri","Den Den","Douar Hicher","El Battan","Jedaïda","Manouba","Mornaguia","Oued Ellil","Tebourba"],
+  "Médenine":["Ben Gardane","Beni Khedache","Djerba Ajim","Djerba Houmt Souk","Djerba Midoun","Médenine Nord","Médenine Sud","Sidi Makhlouf","Zarzis"],
+  "Monastir":["Bekalta","Bembla","Beni Hassen","Jammel","Ksar Hellal","Ksibet El Mediouni","Moknine","Monastir","Ouerdanine","Sahline","Sayada-Lamta-Bou Hajar","Téboulba","Zeramdine"],
+  "Nabeul":["Beni Khalled","Beni Khiar","Bou Argoub","Dar Chaabane","El Haouaria","El Mida","Grombalia","Hammamet","Kelibia","Korba","Kélibia","Menzel Bouzelfa","Menzel Temime","Nabeul","Soliman","Takelsa"],
+  "Sfax":["Agareb","Bir Ali Ben Khalifa","El Amra","El Hencha","Ghraïba","Jebiniana","Kerkennah","Mahres","Menzel Chaker","Sakiet Eddaïer","Sakiet Ezzit","Sfax Est","Sfax Médina","Sfax Ouest","Sfax Sud","Skhira","Thyna","Bir Ali Ben Khalifa"],
+  "Sidi Bouzid":["Bir El Hafey","El Meknassi","Jilma","Mazzouna","Menzel Bouzaiane","Mezouna","Ouled Haffouz","Regueb","Sidi Ali Ben Aoun","Sidi Bouzid Est","Sidi Bouzid Ouest","Souk Jedid"],
+  "Siliana":["Bargou","Bou Arada","El Aroussa","El Krib","Gaâfour","Kesra","Makthar","Rohia","Sidi Morched","Siliana Nord","Siliana Sud"],
+  "Sousse":["Akouda","Bouficha","Enfidha","Hergla","Hammam Sousse","Kalaa Kebira","Kalaa Sghira","Kondar","M'saken","Sidi Bou Ali","Sidi El Heni","Sousse Jaouhara","Sousse Médina","Sousse Riadh","Sousse Sidi Abdelhamid","Zaouiet Sousse"],
+  "Tataouine":["Bir Lahmar","Dhehiba","Ghomrassen","Remada","Smar","Tataouine Nord","Tataouine Sud"],
+  "Tozeur":["Degache","Hazoua","Nefta","Tamerza","Tozeur"],
+  "Tunis":["Bab Bhar","Bab Souika","Carthage","El Kabaria","El Kram","El Menzah","El Omrane","El Omrane Supérieur","El Ouardia","Ettahrir","Ezzouhour","La Goulette","La Marsa","La Médina","Le Bardo","Séjoumi","Sidi El Béchir","Sidi Hassine"],
+  "Zaghouan":["Bir Mcherga","El Fahs","Nadhour","Saouaf","Zaghouan","Zriba"]
+};
+
+function populateGovSelects() {
+    const govs = Object.keys(TUNISIA_DATA).sort();
+    // Modal select
+    const modalGov = document.getElementById('modal-transport-gov');
+    if (modalGov) {
+        const ph = modalGov.options[0];
+        modalGov.innerHTML = '';
+        modalGov.appendChild(ph);
+        govs.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; modalGov.appendChild(o); });
+    }
+    // Card selects
+    document.querySelectorAll('.cfg-gov-select').forEach(sel => {
+        const first = sel.options[0];
+        sel.innerHTML = '';
+        sel.appendChild(first);
+        govs.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
+    });
+}
+
+function updateDelegations() {
+    const gov = document.getElementById('modal-transport-gov')?.value;
+    const delSel = document.getElementById('modal-transport-del');
+    if (!delSel) return;
+    delSel.innerHTML = '<option value="">-- Délégation --</option>';
+    if (gov && TUNISIA_DATA[gov]) {
+        TUNISIA_DATA[gov].forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; delSel.appendChild(o); });
+    }
+}
+
+function updateCardDelegations(govSel) {
+    const type = govSel.dataset.type;
+    const delSel = document.getElementById('cfg-del-' + type);
+    if (!delSel) return;
+    delSel.innerHTML = '<option value="">-- Délégation --</option>';
+    const gov = govSel.value;
+    if (gov && TUNISIA_DATA[gov]) {
+        TUNISIA_DATA[gov].forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; delSel.appendChild(o); });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', populateGovSelects);
+
+// ── EmailJS : envoi email à l'admin à chaque nouvelle réservation ──────────
+function envoyerEmailJS() {
+    const pkg      = document.getElementById('modal-type-original')?.value || '';
+    const isWedding = ['wtiya','henna','mariage'].includes(pkg);
+
+    const typeLabels = {
+        'wtiya':'Wtiya','henna':'Henna','mariage':'Mariage',
+        'shoot-ind':'Shooting Individuel','shoot-mar':'Shooting Mariage','event':'Event Photography'
+    };
+
+    const nom_h  = document.getElementById('m_nom_homme')?.value || '';
+    const nom_f  = document.getElementById('m_nom_femme')?.value || '';
+    const nom    = (nom_h + ' ' + nom_f).trim() || 'Non renseigné';
+    const tel    = document.getElementById('m_telephone')?.value || '';
+    const cin    = document.getElementById('m_cin')?.value || '';
+    const date   = document.getElementById('m_date_soiree')?.value || '';
+    const total  = document.getElementById('modal-total-price')?.value || '0';
+    const pkgTxt = document.getElementById('modal-package-label')?.innerText || '';
+    const type   = typeLabels[pkg] || pkg;
+
+    // Gouvernorat / délégation
+    const gov = document.getElementById('modal-transport-gov')?.value || '';
+    const del = document.getElementById('modal-transport-del')?.value || '';
+    const loc = gov ? (del ? gov + ' / ' + del : gov) : 'Non renseigné';
+
+    emailjs.send('service_devcjn9', 'template_bxij247', {
+        type:      type,
+        nom:       nom,
+        telephone: tel,
+        cin:       cin,
+        date:      date,
+        package:   pkgTxt,
+        prix:      total + ' DT',
+        lieu:      loc,
+    }).catch(function(err) {
+        console.warn('EmailJS error:', err);
+    });
+}
 </script>
 
 </body>
