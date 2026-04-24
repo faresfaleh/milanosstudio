@@ -119,49 +119,86 @@ $updated    = isset($_GET['updated']);
         .svc-name { font-family: 'Dancing Script', cursive; font-size: 2.2rem; font-weight: 700; color: var(--text); }
         .svc-price { margin-left: auto; font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; letter-spacing: 0.1em; color: var(--red); border: 1px solid rgba(227,30,36,0.3); padding: 7px 18px; border-radius: 30px; background: rgba(227,30,36,0.05); }
 
-        /* CARDS — white/red theme */
-        .wedding-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 100%; }
+        /* CARDS — gold/olive luxury theme matching reference */
+        .wedding-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; width: 100%; }
+
         .wedding-card {
             background: #fff;
             border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 16px;
+            border-radius: 18px;
             padding: 0;
             display: flex; flex-direction: column;
             overflow: hidden;
             position: relative;
             transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+            box-shadow: 0 6px 28px rgba(0,0,0,0.08);
         }
-        .wedding-card:hover { transform: translateY(-10px) scale(1.02); border-color: rgba(227,30,36,0.4); box-shadow: 0 24px 60px rgba(227,30,36,0.12), 0 8px 24px rgba(0,0,0,0.1); }
+        .wedding-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(180,148,76,0.45);
+            box-shadow: 0 28px 60px rgba(180,148,76,0.14), 0 8px 24px rgba(0,0,0,0.08);
+        }
 
-        /* Top accent bar with red gradient */
-        .wedding-card-top { height: 5px; background: linear-gradient(90deg, transparent, #E31E24, #ff6b6e, #E31E24, transparent); }
+        /* No top bar — replaced by centered header block */
+        .wedding-card-top { display: none; }
 
-        .wedding-card-body { padding: 28px 26px 24px; display: flex; flex-direction: column; flex: 1; }
+        .wedding-card-body { padding: 32px 24px 20px; display: flex; flex-direction: column; flex: 1; align-items: center; }
 
-        .wedding-card-icon { font-size: 2rem; margin-bottom: 14px; display: inline-block; }
-        .wedding-card-title { font-family: 'Dancing Script', cursive; font-size: 2rem; font-weight: 700; color: var(--text); margin-bottom: 2px; line-height: 1.1; }
-        .wedding-card-desc { font-family: 'Montserrat', sans-serif; font-size: 0.58rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--red); margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(0,0,0,0.07); }
+        /* Icon circle */
+        .wedding-card-icon {
+            width: 72px; height: 72px;
+            border: 2px solid #b4944c;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.9rem;
+            margin-bottom: 16px;
+            background: #fffdf6;
+            box-shadow: 0 2px 12px rgba(180,148,76,0.12);
+        }
 
-        .pkg-line { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); gap: 10px; }
-        .pkg-line:last-of-type { border-bottom: none; }
-        .pkg-line-desc { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; color: var(--text-light); line-height: 1.4; font-style: italic; }
-        .pkg-line-price { font-family: 'Dancing Script', cursive; font-size: 1.3rem; font-weight: 700; color: var(--red); white-space: nowrap; flex-shrink: 0; }
-
-        .btn-reserver {
-            background: #fff;
-            border: none;
-            border-top: 1px solid rgba(0,0,0,0.08);
-            color: var(--red);
+        .wedding-card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem; font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+            line-height: 1.1;
+            text-align: center;
+        }
+        .wedding-card-desc {
             font-family: 'Montserrat', sans-serif;
-            font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase;
-            padding: 15px 20px; cursor: pointer;
-            transition: all 0.35s; margin-top: auto;
-            position: relative; overflow: hidden;
+            font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase;
+            color: #b4944c;
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            text-align: center;
+            width: 100%;
         }
-        .btn-reserver::before { content: ''; position: absolute; inset: 0; background: var(--red); opacity: 0; transition: opacity 0.35s; }
+
+        /* Feature rows */
+        .pkg-line {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 9px 0; border-bottom: 1px solid rgba(0,0,0,0.05); gap: 10px; width: 100%;
+        }
+        .pkg-line:last-of-type { border-bottom: none; }
+        .pkg-line-desc { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; color: #444; line-height: 1.4; }
+        .pkg-line-price { font-family: 'Montserrat', sans-serif; font-size: 0.68rem; font-weight: 700; color: #fff; white-space: nowrap; flex-shrink: 0; background: #b4944c; padding: 4px 10px; border-radius: 30px; letter-spacing: 0.06em; }
+
+        /* CTA Button — gold pill */
+        .btn-reserver {
+            background: linear-gradient(135deg, #c9a84c, #b4944c, #d4b068);
+            border: none;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600;
+            padding: 16px 20px; cursor: pointer; width: 100%;
+            transition: all 0.35s; margin-top: 0;
+            position: relative; overflow: hidden;
+            border-radius: 0 0 18px 18px;
+        }
+        .btn-reserver::before { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.12); opacity: 0; transition: opacity 0.35s; }
         .btn-reserver:hover::before { opacity: 1; }
-        .btn-reserver:hover { color: #fff; }
+        .btn-reserver:hover { box-shadow: 0 6px 24px rgba(180,148,76,0.4); letter-spacing: 0.3em; }
         .btn-reserver span { position: relative; z-index: 1; }
 
         /* CONTACT */
@@ -237,16 +274,17 @@ $updated    = isset($_GET['updated']);
         .cfg-fixed { opacity: 0.7; }
         .cfg-label { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--text); flex: 1; }
         .cfg-check-label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .cfg-checkbox { accent-color: var(--red); width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
-        .cfg-sub { font-family: 'Montserrat', sans-serif; font-size: 0.58rem; color: var(--red); letter-spacing: 0.1em; white-space: nowrap; }
-        .cfg-extra { color: rgba(227,30,36,0.5); }
-        .cfg-badge { font-family: 'Montserrat', sans-serif; font-size: 0.55rem; letter-spacing: 0.12em; color: #4caf7d; border: 1px solid rgba(76,175,80,0.3); padding: 3px 8px; border-radius: 20px; }
+        .cfg-checkbox { accent-color: #b4944c; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+        .cfg-sub { font-family: 'Montserrat', sans-serif; font-size: 0.6rem; color: #fff; letter-spacing: 0.08em; white-space: nowrap; background: #b4944c; padding: 4px 10px; border-radius: 30px; font-weight: 700; }
+        .cfg-extra { color: rgba(180,148,76,0.6); }
+        .cfg-badge { font-family: 'Montserrat', sans-serif; font-size: 0.55rem; letter-spacing: 0.12em; color: #3d9970; border: 1px solid rgba(61,153,112,0.35); padding: 4px 10px; border-radius: 20px; background: rgba(61,153,112,0.07); }
         .cfg-toggle { display: flex; gap: 4px; }
         .cfg-btn { background: #f5f5f5; border: 1px solid rgba(0,0,0,0.15); color: var(--text-light); font-family: 'Montserrat', sans-serif; font-size: 0.65rem; width: 32px; height: 28px; cursor: pointer; border-radius: 4px; transition: all 0.25s; }
-        .cfg-btn.active { background: var(--red); border-color: var(--red); color: #fff; font-weight: 700; }
-        .cfg-note { font-family: 'Montserrat', sans-serif; font-size: 0.55rem; color: rgba(227,30,36,0.5); letter-spacing: 0.08em; font-style: italic; }
+        .cfg-btn.active { background: #b4944c; border-color: #b4944c; color: #fff; font-weight: 700; }
+        .cfg-note { font-family: 'Montserrat', sans-serif; font-size: 0.55rem; color: rgba(180,148,76,0.6); letter-spacing: 0.08em; font-style: italic; }
         .cfg-total-label { font-family: 'Montserrat', sans-serif; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray); }
-        .cfg-total-price { font-family: 'Dancing Script', cursive; font-size: 2rem; font-weight: 700; color: var(--red); transition: all 0.3s; }
+        .cfg-total-price { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: #b4944c; transition: all 0.3s; }
+        .cfg-total-wrap { display: flex; align-items: center; justify-content: space-between; padding: 12px 0 6px; margin-top: 6px; border-top: 1px solid rgba(180,148,76,0.2); width: 100%; }
 
         /* SCROLL REVEAL */
         .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
@@ -397,12 +435,12 @@ $updated    = isset($_GET['updated']);
                     <span style="font-family:'Cormorant Garamond',serif; font-size:1rem; color:#999; display:block; margin-bottom:10px;">🚗 <span id="modal-lbl-transport">Localisation</span></span>
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         <div class="select-wrapper" style="margin-bottom:0;">
-                            <select id="modal-transport-gov" name="gouvernorat" onchange="updateDelegations()" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.95rem; padding:10px 36px 10px 12px; cursor:pointer; outline:none; transition:border-color 0.3s; border-radius:4px;">
+                            <select id="modal-transport-gov" onchange="updateDelegations()" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.95rem; padding:10px 36px 10px 12px; cursor:pointer; outline:none; transition:border-color 0.3s; border-radius:4px;">
                                 <option value="" id="opt-gov-placeholder">-- Gouvernorat --</option>
                             </select>
                         </div>
                         <div class="select-wrapper" style="margin-bottom:0;">
-                            <select id="modal-transport-del" name="delegation" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.95rem; padding:10px 36px 10px 12px; cursor:pointer; outline:none; transition:border-color 0.3s; border-radius:4px;">
+                            <select id="modal-transport-del" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.95rem; padding:10px 36px 10px 12px; cursor:pointer; outline:none; transition:border-color 0.3s; border-radius:4px;">
                                 <option value="" id="opt-del-placeholder">-- Délégation --</option>
                             </select>
                         </div>
@@ -410,10 +448,31 @@ $updated    = isset($_GET['updated']);
                 </div>
             </div>
         </div>
-        <form action="traitement_devis.php" method="POST" onsubmit="cartSaveFromModal(); envoyerEmailJS()">
+
+        <!-- Localisation standalone — visible for ALL types (shooting, event, wedding) -->
+        <div id="modal-localisation-group" style="margin-bottom:20px; padding:18px; background:#f8f8f8; border:1px solid rgba(0,0,0,0.1); border-radius:8px; display:none;">
+            <span style="font-family:'Cormorant Garamond',serif; font-size:1rem; color:#999; display:block; margin-bottom:10px;">🚗 <span>Localisation</span></span>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <div class="select-wrapper" style="margin-bottom:0;">
+                    <select id="modal-loc-gov" onchange="updateLocDelegations()" style="width:100%; appearance:none; background:#fff; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.95rem; padding:10px 36px 10px 12px; cursor:pointer; outline:none; border-radius:4px;">
+                        <option value="">-- Gouvernorat --</option>
+                    </select>
+                </div>
+                <div class="select-wrapper" style="margin-bottom:0;">
+                    <select id="modal-loc-del" style="width:100%; appearance:none; background:#fff; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.95rem; padding:10px 36px 10px 12px; cursor:pointer; outline:none; border-radius:4px;">
+                        <option value="">-- Délégation --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <form action="traitement_devis.php" method="POST" onsubmit="syncLocalisationToForm(); cartSaveFromModal(); envoyerEmailJS()">
             <input type="hidden" name="choix_package" id="modal-package-input">
             <input type="hidden" id="modal-type-original">
             <input type="hidden" name="res_id" id="modal-res-id" value="">
+            <!-- Hidden inputs for localisation — synced from selects above on submit -->
+            <input type="hidden" name="gouvernorat" id="modal-hidden-gov">
+            <input type="hidden" name="delegation" id="modal-hidden-del">
             <div class="form-group" id="modal-type-group" style="display:none;">
                 <label id="lbl-type">Type de cérémonie</label>
                 <div class="select-wrapper">
@@ -487,12 +546,29 @@ $updated    = isset($_GET['updated']);
                             <span class="pkg-line-desc">📸 <span id="lbl-photo-si">Appareil photo</span></span>
                             <span class="cfg-badge">✓ Inclus</span>
                         </div>
-                        <div class="pkg-line" style="margin-bottom:16px;">
+                        <div class="pkg-line" style="margin-bottom:8px;">
                             <span class="pkg-line-desc" id="lbl-prix-shoot-ind">Prix fixe</span>
                             <span class="pkg-line-price">250 DT</span>
                         </div>
+                        <div class="pkg-line" style="margin-bottom:8px;">
+                            <span class="pkg-line-desc" id="lbl-sans-transport-si" style="color:#999; font-size:0.82rem;">Prix sans transport</span>
+                        </div>
+                        <!-- Localisation -->
+                        <div style="width:100%; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+                            <span style="font-family:'Cormorant Garamond',serif; font-size:0.85rem; color:#999;">🚗 <span id="lbl-transport-si">Localisation</span></span>
+                            <div class="select-wrapper" style="margin-bottom:0;">
+                                <select class="cfg-gov-select" onchange="updateCardDelegations(this)" data-type="si" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.85rem; padding:8px 28px 8px 10px; cursor:pointer; outline:none; border-radius:4px;">
+                                    <option value="">-- Gouvernorat --</option>
+                                </select>
+                            </div>
+                            <div class="select-wrapper" style="margin-bottom:0;">
+                                <select class="cfg-del-select" id="cfg-del-si" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.85rem; padding:8px 28px 8px 10px; cursor:pointer; outline:none; border-radius:4px;">
+                                    <option value="">-- Délégation --</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn-reserver" style="width:100%;" onclick="openModal('Shooting Individuel','shoot-ind')" id="btn-reserver-shoot-ind"><span id="btn-text-shoot-ind">Réserver</span></button>
+                    <button class="btn-reserver" style="width:100%;" onclick="openModalFromCard('Shooting Individuel','shoot-ind','si')" id="btn-reserver-shoot-ind"><span id="btn-text-shoot-ind">Réserver</span></button>
                 </div>
 
                 <!-- Shooting Mariage -->
@@ -506,12 +582,29 @@ $updated    = isset($_GET['updated']);
                             <span class="pkg-line-desc">📸 <span id="lbl-photo-sm">Appareil photo</span></span>
                             <span class="cfg-badge">✓ Inclus</span>
                         </div>
-                        <div class="pkg-line" style="margin-bottom:16px;">
+                        <div class="pkg-line" style="margin-bottom:8px;">
                             <span class="pkg-line-desc" id="lbl-prix-shoot-mar">Prix fixe</span>
                             <span class="pkg-line-price">250 DT</span>
                         </div>
+                        <div class="pkg-line" style="margin-bottom:8px;">
+                            <span class="pkg-line-desc" id="lbl-sans-transport-sm" style="color:#999; font-size:0.82rem;">Prix sans transport</span>
+                        </div>
+                        <!-- Localisation -->
+                        <div style="width:100%; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+                            <span style="font-family:'Cormorant Garamond',serif; font-size:0.85rem; color:#999;">🚗 <span id="lbl-transport-sm">Localisation</span></span>
+                            <div class="select-wrapper" style="margin-bottom:0;">
+                                <select class="cfg-gov-select" onchange="updateCardDelegations(this)" data-type="sm" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.85rem; padding:8px 28px 8px 10px; cursor:pointer; outline:none; border-radius:4px;">
+                                    <option value="">-- Gouvernorat --</option>
+                                </select>
+                            </div>
+                            <div class="select-wrapper" style="margin-bottom:0;">
+                                <select class="cfg-del-select" id="cfg-del-sm" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.85rem; padding:8px 28px 8px 10px; cursor:pointer; outline:none; border-radius:4px;">
+                                    <option value="">-- Délégation --</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn-reserver" style="width:100%;" onclick="openModal('Shooting Mariage','shoot-mar')" id="btn-reserver-shoot-mar"><span id="btn-text-shoot-mar">Réserver</span></button>
+                    <button class="btn-reserver" style="width:100%;" onclick="openModalFromCard('Shooting Mariage','shoot-mar','sm')" id="btn-reserver-shoot-mar"><span id="btn-text-shoot-mar">Réserver</span></button>
                 </div>
 
             </div>
@@ -603,10 +696,76 @@ $updated    = isset($_GET['updated']);
         <li class="reveal" style="padding-bottom:12px;">
             <div class="svc-header">
                 <span class="svc-name" id="svc-event">Event Photography</span>
-                <span class="svc-price">350 DT</span>
+                <span class="svc-price">450 DT</span>
             </div>
-            <div style="padding: 0 4px;">
-                <button class="btn-reserver" style="border-radius:30px; padding:13px 40px;" onclick="openModal('Event Photography', 'event')" id="btn-reserver-event"><span>Réserver</span></button>
+            <div class="wedding-cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 380px)); justify-content: center;">
+                <div class="wedding-card">
+                    <div class="wedding-card-top"></div>
+                    <div class="wedding-card-body">
+                        <div class="wedding-card-icon">🎉</div>
+                        <div class="wedding-card-title" id="card-title-event">Event Photography</div>
+                        <div class="wedding-card-desc" id="desc-event">Cérémonie & événements</div>
+
+                        <div class="cfg-wrap" id="cfg-event">
+
+                            <div class="cfg-row cfg-fixed">
+                                <label class="cfg-label">📸 Appareil photo</label>
+                                <span class="cfg-badge">Inclus ✓</span>
+                            </div>
+
+                            <div class="cfg-row cfg-fixed">
+                                <label class="cfg-label" style="font-size:0.85rem;">📀 Photo illimité clé USB + montage vidéo</label>
+                                <span class="cfg-badge">Inclus ✓</span>
+                            </div>
+
+                            <div class="cfg-row">
+                                <label class="cfg-label cfg-check-label">
+                                    <input type="checkbox" class="cfg-checkbox" onchange="setCfg('event','drone',this.checked?1:0)">
+                                    🚁 <span class="lbl-drone">Drone</span>
+                                </label>
+                                <span class="cfg-sub">+400 DT</span>
+                            </div>
+
+                            <div class="cfg-row">
+                                <label class="cfg-label cfg-check-label">
+                                    <input type="checkbox" class="cfg-checkbox" onchange="setCfg('event','girafe',this.checked?1:0)">
+                                    🦒 <span class="lbl-girafe">Girafe photography</span>
+                                </label>
+                                <span class="cfg-sub">+450 DT</span>
+                            </div>
+
+                            <div class="cfg-row" id="cfg-photobook-row-event">
+                                <label class="cfg-label cfg-check-label">
+                                    <input type="checkbox" class="cfg-checkbox" onchange="setCfg('event','photobook',this.checked?1:0)">
+                                    📒 <span class="lbl-photobook-event">Photo book 50 photos</span>
+                                </label>
+                                <span class="cfg-sub">+150 DT</span>
+                            </div>
+
+                            <div class="cfg-row" style="flex-direction:column; align-items:flex-start; gap:6px; padding-top:6px;">
+                                <label class="cfg-label" style="color:#999;">🚗 <span class="lbl-transport">Localisation</span></label>
+                                <div style="width:100%; display:flex; flex-direction:column; gap:6px;">
+                                    <div class="select-wrapper" style="margin-bottom:0;">
+                                        <select class="cfg-gov-select" onchange="updateCardDelegations(this)" data-type="event" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.85rem; padding:8px 28px 8px 10px; cursor:pointer; outline:none; border-radius:4px;">
+                                            <option value="">-- Gouvernorat --</option>
+                                        </select>
+                                    </div>
+                                    <div class="select-wrapper" style="margin-bottom:0;">
+                                        <select class="cfg-del-select" id="cfg-del-event" style="width:100%; appearance:none; background:#f8f8f8; border:1px solid rgba(0,0,0,0.15); color:#1a1a1a; font-family:'Cormorant Garamond',serif; font-size:0.85rem; padding:8px 28px 8px 10px; cursor:pointer; outline:none; border-radius:4px;">
+                                            <option value="">-- Délégation --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cfg-total-wrap">
+                                <span class="cfg-total-label lbl-total-estime">Total estimé</span>
+                                <span class="cfg-total-price" id="cfg-total-event">450 DT</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-reserver" style="width:100%;" onclick="openModalCfg('Event Photography','event')" id="btn-reserver-event"><span>Réserver</span></button>
+                </div>
             </div>
         </li>
     </ul>
@@ -919,6 +1078,27 @@ function openModal(label, value) {
 
     const origInput = document.getElementById('modal-type-original');
     if (origInput) origInput.value = value;
+
+    // Show standalone localisation block for shooting/event (not inside cam-group)
+    const locGroup = document.getElementById('modal-localisation-group');
+    if (locGroup) {
+        locGroup.style.display = isShooting ? 'block' : 'none';
+        if (isShooting) {
+            // Populate gouvernorat if not already done
+            const govSel = document.getElementById('modal-loc-gov');
+            if (govSel && govSel.options.length <= 1 && window.tunisiaData) {
+                Object.keys(tunisiaData).sort().forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g; opt.textContent = g;
+                    govSel.appendChild(opt);
+                });
+            }
+            // Reset
+            if (govSel) govSel.value = '';
+            const delSel = document.getElementById('modal-loc-del');
+            if (delSel) { delSel.innerHTML = '<option value="">-- Délégation --</option>'; }
+        }
+    }
     // Clear all form fields for fresh reservation
     ['m_nom_homme','m_nom_femme','m_telephone','m_cin','m_date_soiree'].forEach(id => {
         const el = document.getElementById(id); if (el) el.value = '';
@@ -956,6 +1136,7 @@ const cfgState = {
     wtiya:   { drone: 0, girafe: 0, photobook: 0 },
     henna:   { drone: 0, girafe: 0, photobook: 0 },
     mariage: { drone: 0, girafe: 0, photobook: 0 },
+    event:   { drone: 0, girafe: 0, photobook: 0 },
 };
 
 // CONFIGURATEUR PRIX — SHOOTING
@@ -1083,9 +1264,9 @@ function openModalCfg(label, type) {
     if (cam2) cam2.checked = false;
     if (droneEl) droneEl.checked = false;
     if (girafeEl) girafeEl.checked = false;
-    // Show/hide camera group only for wedding types
+    // Show/hide camera group — for wedding types AND event
     const camGroup = document.getElementById('modal-cam-group');
-    if (camGroup) camGroup.style.display = ['wtiya','henna','mariage'].includes(type) ? 'block' : 'none';
+    if (camGroup) camGroup.style.display = ['wtiya','henna','mariage','event'].includes(type) ? 'block' : 'none';
     // Show/hide photobook row + update label and price
     const pbRow = document.getElementById('modal-photobook-row');
     const pbLbl = document.getElementById('modal-lbl-photobook');
@@ -1101,8 +1282,12 @@ function openModalCfg(label, type) {
         if (pbPrice) pbPrice.innerHTML = '<b>+150 DT</b>';
     }
     updateModalTotal();
-    const _tg2 = document.getElementById('modal-type-group'); if(_tg2) _tg2.style.display = 'block';
+    // For event: hide the "Type de cérémonie" dropdown (not needed)
+    const _tg2 = document.getElementById('modal-type-group');
+    if (_tg2) _tg2.style.display = type === 'event' ? 'none' : 'block';
+    if (type !== 'event') {
         document.getElementById('modal-wedding-type').value = type;
+    }
     updateNomFields(type);
     document.getElementById('modal-overlay').style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -1569,6 +1754,57 @@ function updateCardDelegations(govSel) {
 document.addEventListener('DOMContentLoaded', populateGovSelects);
 
 // ── EmailJS : envoi email à l'admin à chaque nouvelle réservation ──────────
+function syncLocalisationToForm() {
+    // For wedding types, localisation is in the cam-group selects
+    // For shooting/event, it's in the standalone modal-loc-* selects
+    const type = document.getElementById('modal-type-original')?.value || '';
+    const isWedding = ['wtiya','henna','mariage'].includes(type);
+    let gov = '', del = '';
+    if (isWedding) {
+        gov = document.getElementById('modal-transport-gov')?.value || '';
+        del = document.getElementById('modal-transport-del')?.value || '';
+    } else {
+        gov = document.getElementById('modal-loc-gov')?.value || '';
+        del = document.getElementById('modal-loc-del')?.value || '';
+    }
+    const hGov = document.getElementById('modal-hidden-gov');
+    const hDel = document.getElementById('modal-hidden-del');
+    if (hGov) hGov.value = gov;
+    if (hDel) hDel.value = del;
+}
+
+function updateLocDelegations() {
+    const govSel = document.getElementById('modal-loc-gov');
+    const delSel = document.getElementById('modal-loc-del');
+    if (!govSel || !delSel) return;
+    const gov = govSel.value;
+    delSel.innerHTML = '<option value="">-- Délégation --</option>';
+    if (gov && window.tunisiaData && tunisiaData[gov]) {
+        tunisiaData[gov].forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d; opt.textContent = d;
+            delSel.appendChild(opt);
+        });
+    }
+}
+
+// Opens modal for shooting cards and pre-fills localisation from the card selects
+function openModalFromCard(label, value, cardId) {
+    openModal(label, value);
+    // Sync card's gouvernorat/délégation to the standalone modal-loc selects
+    const cardGov = document.querySelector(`.cfg-gov-select[data-type="${cardId}"]`);
+    const cardDel = document.getElementById('cfg-del-' + cardId);
+    const modalGov = document.getElementById('modal-loc-gov');
+    const modalDel = document.getElementById('modal-loc-del');
+    if (cardGov && modalGov && cardGov.value) {
+        modalGov.value = cardGov.value;
+        updateLocDelegations();
+        setTimeout(() => {
+            if (cardDel && modalDel) modalDel.value = cardDel.value;
+        }, 50);
+    }
+}
+
 function envoyerEmailJS() {
     const pkg      = document.getElementById('modal-type-original')?.value || '';
     const isWedding = ['wtiya','henna','mariage'].includes(pkg);
